@@ -1443,15 +1443,15 @@
       <div class="htp-grid">
         <div class="htp-card">
           <div class="hc-head"><span class="hc-icon">🔗</span><span class="hc-title">How combos work</span></div>
-          <p>When you pick <strong>2 or more consecutive clean or regulation policies</strong>, you trigger a synergy bonus: <strong>+3 Green Progress</strong> and <strong>−2 Emissions</strong> are added on top of the policy's normal effects.</p>
+          <p>When you pick <strong>2 or more consecutive clean/regulation policies that are all different from each other</strong>, you trigger a synergy bonus: <strong>+3 Green Progress</strong> and <strong>−2 Emissions</strong> on top of normal effects.</p>
         </div>
         <div class="htp-card">
           <div class="hc-head"><span class="hc-icon">✅</span><span class="hc-title">What counts as "clean"</span></div>
-          <p>Renewable Energy, Green Jobs, Public Transit, Environmental Regulations, and Carbon Tax all count. Fossil Fuel, Delay, and Disaster Relief break the streak.</p>
+          <p>Renewable Energy, Green Jobs, Public Transit, Environmental Regulations, and Carbon Tax all count — but only if you didn't pick that same policy last turn. Repeating the same policy resets the streak.</p>
         </div>
         <div class="htp-card">
           <div class="hc-head"><span class="hc-icon">💥</span><span class="hc-title">Breaking the streak</span></div>
-          <p>Picking Fossil Fuel expansion or Delay resets your combo to 0. You'll need two consecutive clean picks again before the bonus activates.</p>
+          <p>Repeating the same policy, picking Fossil Fuel, or picking Delay all reset your combo to 0. You need two different clean policies in a row to reactivate the bonus.</p>
         </div>
         <div class="htp-card">
           <div class="hc-head"><span class="hc-icon">🏆</span><span class="hc-title">Tracked in analytics</span></div>
@@ -1915,6 +1915,7 @@ const state = {
   awaitingNextYear: false,
   policyUsage: {},       // Feature 4: {policyId: count}
   lastPolicyCategory: null, // Feature 5: combo tracking
+  lastPolicyId: null,       // Feature 5: combo requires different policy each turn
   comboCount: 0,         // Feature 5: consecutive clean policies
   totalCombos: 0,        // Feature 7: analytics
   analytics: {
@@ -2270,23 +2271,27 @@ function applyPolicy(policy) {
     deltas.emissions = Math.round(deltas.emissions * hardCutScale);
   }
 
-  // Feature 5: combo synergy — clean policy chain
+  // Feature 5: combo synergy — requires consecutive DIFFERENT clean/regulation policies
   const cat = POLICY_CATEGORY[policy.id];
   const comboEl = document.getElementById('combo-badge');
   comboEl.classList.remove('show');
   let comboBonus = null;
-  if (cat === 'clean' || cat === 'regulation') {
+  const isClean = cat === 'clean' || cat === 'regulation';
+  const isDifferentPolicy = policy.id !== state.lastPolicyId;
+  if (isClean && isDifferentPolicy) {
     state.comboCount++;
     if (state.comboCount >= 2) {
       deltas.green     = (deltas.green     || 0) + 3;
       deltas.emissions = (deltas.emissions || 0) - 2;
       state.totalCombos++;
-      comboBonus = `⚡ Policy Synergy! +3 Green, -2 Emissions bonus (${state.comboCount} clean in a row)`;
+      comboBonus = `⚡ Policy Synergy! +3 Green, -2 Emissions bonus (${state.comboCount} different clean policies in a row)`;
     }
   } else {
-    state.comboCount = 0;
+    // Same policy repeated, or a fossil/delay/relief pick — reset streak
+    state.comboCount = isClean ? 1 : 0;
   }
   state.lastPolicyCategory = cat;
+  state.lastPolicyId = policy.id;
 
   // Init audio
   Audio.init(); Audio.resume();
@@ -2962,6 +2967,7 @@ function resetGame() {
   state.awaitingNextYear = false;
   state.policyUsage = {};
   state.lastPolicyCategory = null;
+  state.lastPolicyId = null;
   state.comboCount = 0;
   state.totalCombos = 0;
   state.analytics = { policyCounts: {}, worstEventName: null, worstEventImpact: 0 };
