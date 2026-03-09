@@ -2703,10 +2703,10 @@ function updateCountryVisual() {
   const treesEl = document.getElementById('trees-layer');
   if (green > 65) {
     treesEl.style.opacity = '1';
-    treesEl.innerHTML = '🌳🌲🌳🌲🌳'.split('').map(t => `<span class="tree">${t}</span>`).join('');
+    treesEl.innerHTML = ['🌳','🌲','🌳','🌲','🌳'].map(t => `<span class="tree">${t}</span>`).join('');
   } else if (green > 40) {
     treesEl.style.opacity = '0.7';
-    treesEl.innerHTML = '🌳🌲🌳'.split('').map(t => `<span class="tree">${t}</span>`).join('');
+    treesEl.innerHTML = ['🌳','🌲','🌳'].map(t => `<span class="tree">${t}</span>`).join('');
   } else if (green > 20) {
     treesEl.style.opacity = '0.4';
     treesEl.innerHTML = '<span class="tree">🌵</span><span class="tree">🌵</span>';
