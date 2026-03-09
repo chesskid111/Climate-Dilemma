@@ -2183,7 +2183,7 @@ function renderPolicies() {
     // Feature 4: cooldown — steeper effectiveness curve
     const uses = state.policyUsage[policy.id] || 0;
     const scale = uses === 0 ? 1 : uses === 1 ? 0.6 : uses === 2 ? 0.35 : 0.2;
-    const eff = uses === 0 ? 'Fresh' : uses === 1 ? '60% eff.' : uses === 2 ? '35% eff.' : '20% eff.';
+    const eff = uses === 0 ? 'Fresh' : uses === 1 ? '60% off.' : uses === 2 ? '35% off.' : '20% off.';
     const effColor = uses === 0 ? 'var(--green)' : uses === 1 ? 'var(--yellow)' : '#f87171';
 
     // Scaled deltas for display
